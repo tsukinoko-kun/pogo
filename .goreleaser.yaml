@@ -1,0 +1,77 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+---
+builds:
+  - id: windows-only
+    main: ./bin/pogo/main.go
+    binary: pogo
+    ldflags:
+      - -s
+      - -w
+      - -X github.com/tsukinoko-kun/pogo/metadata.Version={{.Version}}
+    goos:
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    env:
+      - CGO_ENABLED=0
+  - id: default
+    main: ./bin/pogo/main.go
+    binary: pogo
+    ldflags:
+      - -s
+      - -w
+      - -X github.com/tsukinoko-kun/pogo/metadata.Version={{.Version}}
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    env:
+      - CGO_ENABLED=0
+
+archives:
+  - id: windows-only
+    builds: [windows-only]
+    format: zip
+  - id: default
+    builds: [default]
+    format: tar.gz
+
+checksum:
+  name_template: checksums.txt
+  algorithm: sha256
+
+release:
+  prerelease: auto
+
+universal_binaries:
+  - replace: false
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+brews:
+  - name: pogo
+    homepage: https://github.com/tsukinoko-kun/pogo
+    description: Centralized version control system
+    license: MIT
+    repository:
+      owner: tsukinoko-kun
+      name: homebrew-tap
+    commit_author:
+      name: tsukinoko-kun
+      email: gh@frankmayer.dev
+
+scoops:
+  - name: pogo
+    url_template: https://github.com/tsukinoko-kun/pogo/releases/download/{{ .Tag }}/{{ .ArtifactName }}
+    commit_author:
+      name: tsukinoko-kun
+      email: gh@frankmayer.dev
+    commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
+    homepage: https://github.com/tsukinoko-kun/pogo
+    description: Centralized version control system
+    license: MIT
+    repository:
+      owner: tsukinoko-kun
+      name: scoop-bucket

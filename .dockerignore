@@ -1,0 +1,11 @@
+*.sqlc.go
+*.pb.go
+.DS_Store
+.git/
+.idea/
+.vscode/
+.github/
+docker-compose.yaml
+Dockerfile
+*.Dockerfile
+/content/

@@ -1,0 +1,50 @@
+# yaml-language-server: https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/github-workflow.json
+---
+name: Generate wiki
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/docs.yaml
+      - cmd/*.go
+      - bin/docs/*
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate-wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          check-latest: true
+          cache-dependency-path: go.sum
+      - name: Download dependencies
+        run: |
+          go mod download
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+          go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+      - name: Prebuild
+        run: |
+          sqlc generate
+          protoc --go_out=paths=source_relative:. protos/messages.proto
+      - name: Generate wiki
+        run: go run ./bin/docs/
+        env:
+          USERNAME: ${{ github.actor }}
+          PASSWORD: ${{ secrets.WIKI_TOKEN }}
+          EMAIL: ${{ github.actor }}@users.noreply.github.com

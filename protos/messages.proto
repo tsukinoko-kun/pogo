@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+package protos;
+
+option go_package = "github.com/tsukinoko-kun/pogo/protos";
+
+import "google/protobuf/timestamp.proto";
+
+message HTTPSignature {
+  // The signed data
+  bytes body_hash = 1;
+  string request_path = 2;
+  google.protobuf.Timestamp timestamp = 3;
+  string username = 4;
+  string machine_id = 5;
+  bytes public_key = 6;
+
+  // The signature
+  string format = 7;
+  bytes blob = 8;
+  bytes rest = 9;
+}
+
+message InitRequest {
+  string Name = 1;
+  repeated string Bookmarks = 2;
+}
+
+message InitResponse { int32 RepoID = 1; }
+
+message PushFileInfo {
+  string Name = 1;
+  optional bool Executable = 2;
+  bytes ContentHash = 3;
+  bool ContainsContent = 4;
+}
+
+message CheckFilesExistsRequest { repeated bytes ContentHash = 1; }
+
+message CheckFilesExistsResponse { repeated bool Exists = 1; }
+
+message NewChangeRequest {
+  repeated string Parents = 1;
+  optional string description = 2;
+  repeated string SetBookmarks = 3;
+}
+
+message SetBookmarkRequest {
+  string Bookmark = 1;
+  int64 ChangeId = 2;
+}
+
+message NewChangeResponse { int64 ChangeId = 1; }
+
+message CheckoutRequest { int64 ChangeId = 1; }
+
+message LogRequest {
+  string Head = 1;
+  int32 Limit = 2;
+  string TimeZone = 3;
+}
+
+message LogResponse { string Log = 1; }
+
+message FindChangeRequest {
+  string Name = 1;
+  bool IncludeDescription = 2;
+}
+
+message FindChangeResponse {
+  int64 ChangeId = 1;
+  optional string Description = 2;
+}
+
+message DescribeRequest {
+  string Change = 1;
+  string Description = 2;
+}
+
+message ListBookmarksResponse { repeated Bookmark Bookmarks = 1; }
+
+message Bookmark {
+  string BookmarkName = 1;
+  int64 ChangeID = 2;
+  string ChangeName = 3;
+  string ChangePrefix = 4;
+}
+
+message ConflictsRequest { string Change = 1; }
+
+message ConflictsResponse { repeated string Conflicts = 1; }
